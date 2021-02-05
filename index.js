@@ -122,7 +122,7 @@ if (phpunit) {
                 name: 'PHPUnit on PHP ' + version + ' with ' + deps + ' dependencies',
                 job: JSON.stringify(job),
                 operatingSystem: 'ubuntu-latest',
-                action: 'docker://ghcr.io/weierophinney/laminas-check-runner:latest',
+                action: 'laminas/laminas-continuous-integration-action@v0',
             });
         });
     });
@@ -140,7 +140,7 @@ if (checks.length) {
             name: command + ' on PHP ' + stablePHP,
             job: JSON.stringify(job),
             operatingSystem: 'ubuntu-latest',
-            action: 'docker://ghcr.io/weierophinney/laminas-check-runner:latest',
+            action: 'laminas/laminas-continuous-integration-action@v0',
         });
     });
 }
