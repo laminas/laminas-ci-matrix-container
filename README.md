@@ -17,7 +17,7 @@ Currently, it identifies the following:
 Create a Dockerfile-based GitHub Action that uses this as the base image:
 
 ```Dockerfile
-FROM ghcr.io/laminas/laminas-ci-matrix-container:v1
+FROM ghcr.io/laminas/laminas-ci-matrix-container:0
 
 LABEL "com.github.actions.icon"="share-2"
 LABEL "com.github.actions.color"="blue"
