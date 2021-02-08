@@ -8,7 +8,7 @@ let tag    = tagRef.split('/').pop();
 
 let major = semver.major(tag);
 let minor = major + '.' + semver.minor(tag);
-let patch = minor + '.' + semver.minor(tag);
+let patch = minor + '.' + semver.patch(tag);
 
 let tags = [
     package + ':' + major,
