@@ -25,9 +25,6 @@ function checkout {
     git checkout $REF
 }
 
-echo "Environment:"
-env
-
 checkout
 
 DIFF=
