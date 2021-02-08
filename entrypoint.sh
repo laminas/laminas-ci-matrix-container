@@ -1,10 +1,12 @@
 #!/bin/bash
 
+set -e
+
 function checkout {
     local REF=
     case $GITHUB_EVENT_NAME in
         pull_request)
-            REF=$GITHUB_HEAD_REF
+            REF=refs/pull/$GITHUB_HEAD_REF
             ;;
         push)
             REF=$GITHUB_REF
