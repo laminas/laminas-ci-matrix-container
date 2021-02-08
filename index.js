@@ -115,6 +115,15 @@ if (! require_code_checks) {
 
 let checks = [];
 
+const fileTest = function (filename) {
+    return function () {
+        if (fs.existsSync(filename)) {
+            return true;
+        }
+        return false;
+    };
+};
+
 if (config.checks !== undefined && Array.isArray(config.checks)) {
     core.info('Using checks found in configuration');
     checks = config;
@@ -125,23 +134,23 @@ if (config.checks !== undefined && Array.isArray(config.checks)) {
             command: "./vendor/bin/phpcs -q --report=checkstyle | cs2pr",
             codeCheck: true,
             test: [
-                'phpcs.xml.dist',
-                'phpcs.xml',
+                fileTest('phpcs.xml.dist'),
+                fileTest('phpcs.xml'),
             ]
         },
         {
             command: "./vendor/bin/psalm --shepherd --stats --output-format=github",
             codeCheck: true,
             test: [
-                'psalm.xml.dist',
-                'psalm.xml',
+                fileTest('psalm.xml.dist'),
+                fileTest('psalm.xml'),
             ]
         },
         {
             command: "./vendor/bin/phpbench run --revs=2 --iterations=2 --report=aggregate",
             codeCheck: true,
             test: [
-                'phpbench.json',
+                fileTest('phpbench.json'),
             ]
         },
     ].forEach(function (check) {
@@ -150,12 +159,12 @@ if (config.checks !== undefined && Array.isArray(config.checks)) {
             return;
         }
 
-        check.test.forEach(function (filename) {
+        check.test.forEach(function (test) {
             if (checks.indexOf(check.command) !== -1) {
                 return;
             }
 
-            if (fs.existsSync(filename)) {
+            if (test()) {
                 checks.push(check.command);
             }
         });
