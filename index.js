@@ -73,8 +73,7 @@ if (config.checks !== undefined && Array.isArray(config.checks)) {
     core.info('Discovering checks based on QA files in package');
     [
         {
-            // Eventually: command: "./vendor/bin/phpcs --report checkstyle | cs2pr",
-            command: "./vendor/bin/phpcs",
+            command: "./vendor/bin/phpcs -q --report=checkstyle | cs2pr",
             test: [
                 'phpcs.xml.dist',
                 'phpcs.xml',
