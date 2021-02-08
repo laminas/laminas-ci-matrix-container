@@ -53,6 +53,4 @@ if [[ "$DIFF" != "" ]];then
     REQUIRE_CHECKS=false
 fi
 
-echo "Requiring code checks: ${REQUIRE_CHECKS}"
-
 /action/index.js ${REQUIRE_CHECKS}

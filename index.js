@@ -6,6 +6,7 @@ const process = require('process');
 
 const args = process.argv.slice(2)
 
+let require_doc_linting = false;
 let require_code_checks = true;
 let require_code_checks_arg = '';
 if (args.length) {
@@ -24,40 +25,38 @@ if (fs.existsSync('.laminas-ci.json')) {
     }
 }
 
-if (! require_code_checks) {
-    let diff = [];
-    if (fs.existsSync('.laminas-ci-diff')) {
-        diff = fs.readFileSync('.laminas-ci-diff').toString().split(/\r?\n/);
-    }
-
-    diff.forEach(function (filename) {
-        if (require_code_checks) {
-            return;
-        }
-
-        /** @var String filename */
-        if (filename.match(/\.php$/)) {
-            core.info('- Enabling code checks due to presence of PHP files in diff');
-            require_code_checks = true;
-        }
-
-        if (filename.match(/(phpunit|phpcs|psalm)\.xml(\.dist)?$/)) {
-            core.info('- Enabling code checks due to presence of check config files in diff');
-            require_code_checks = true;
-        }
-
-        if (filename.match(/composer\.(json|lock)$/)) {
-            core.info('- Enabling code checks due to presence of composer files in diff');
-            require_code_checks = true;
-        }
-
-        if (filename.match(/(^|[/\\])(\.github|src|lib|tests?|config|bin)[/\\]/)) {
-            core.info('- Enabling code checks due to file existing in source directory');
-            require_code_checks = true;
-        }
-    });
+let diff = [];
+if (fs.existsSync('.laminas-ci-diff')) {
+    diff = fs.readFileSync('.laminas-ci-diff').toString().split(/\r?\n/);
 }
 
+diff.forEach(function (filename) {
+    /** @var String filename */
+    if (filename.match(/\.php$/)) {
+        core.info('- Enabling code checks due to presence of PHP files in diff');
+        require_code_checks = true;
+    }
+
+    if (filename.match(/(phpunit|phpcs|psalm)\.xml(\.dist)?$/)) {
+        core.info('- Enabling code checks due to presence of check config files in diff');
+        require_code_checks = true;
+    }
+
+    if (filename.match(/composer\.(json|lock)$/)) {
+        core.info('- Enabling code checks due to presence of composer files in diff');
+        require_code_checks = true;
+    }
+
+    if (filename.match(/(^|[/\\])(\.github|src|lib|tests?|config|bin)[/\\]/)) {
+        core.info('- Enabling code checks due to file existing in source directory');
+        require_code_checks = true;
+    }
+
+    if (filename.match(/(^mkdocs.yml|docs?\/book\/.*\.md$)/)) {
+        core.info('- Enabling markdown linting due to documentation existing in diff');
+        require_doc_linting = true;
+    }
+});
 
 let composerJson = {};
 try {
@@ -132,7 +131,7 @@ if (config.checks !== undefined && Array.isArray(config.checks)) {
     [
         {
             command: "./vendor/bin/phpcs -q --report=checkstyle | cs2pr",
-            codeCheck: true,
+            runCheck: require_code_checks,
             test: [
                 fileTest('phpcs.xml.dist'),
                 fileTest('phpcs.xml'),
@@ -140,7 +139,7 @@ if (config.checks !== undefined && Array.isArray(config.checks)) {
         },
         {
             command: "./vendor/bin/psalm --shepherd --stats --output-format=github",
-            codeCheck: true,
+            runCheck: require_code_checks,
             test: [
                 fileTest('psalm.xml.dist'),
                 fileTest('psalm.xml'),
@@ -148,14 +147,35 @@ if (config.checks !== undefined && Array.isArray(config.checks)) {
         },
         {
             command: "./vendor/bin/phpbench run --revs=2 --iterations=2 --report=aggregate",
-            codeCheck: true,
+            runCheck: require_code_checks,
             test: [
                 fileTest('phpbench.json'),
             ]
         },
+        {
+            command: "yamllint mkdocs.yml",
+            runCheck: require_doc_linting,
+            test: [
+                fileTest('mkdocs.yml'),
+            ]
+        },
+        {
+            command: "markdownlint doc/book/**/*.md",
+            runCheck: require_doc_linting,
+            test: [
+                fileTest('doc/book/'),
+            ]
+        },
+        {
+            command: "markdownlint docs/book/**/*.md",
+            runCheck: require_doc_linting,
+            test: [
+                fileTest('docs/book/'),
+            ]
+        },
     ].forEach(function (check) {
         // Skip code checks if they are not required
-        if (! require_code_checks && check.codeCheck) {
+        if (! check.runCheck) {
             return;
         }
 
