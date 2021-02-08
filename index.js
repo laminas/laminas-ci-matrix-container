@@ -2,6 +2,18 @@
 const core = require('@actions/core');
 const semver = require('semver')
 const fs = require('fs')
+const process = require('process');
+
+const args = process.argv.slice(2)
+
+let require_code_checks = true;
+let require_code_checks_arg = '';
+if (args.length) {
+    require_code_checks_arg = args.shift();
+    if (require_code_checks_arg === 'false') {
+        require_code_checks = false;
+    }
+}
 
 let config = {};
 if (fs.existsSync('.laminas-ci.json')) {
@@ -11,6 +23,41 @@ if (fs.existsSync('.laminas-ci.json')) {
         core.setFailed('Failed to parse .laminas-ci.json: ' + error.message);
     }
 }
+
+if (! require_code_checks) {
+    let diff = [];
+    if (fs.existsSync('.laminas-ci-diff')) {
+        diff = fs.readFileSync('.laminas-ci-diff').toString().split(/\r?\n/);
+    }
+
+    diff.forEach(function (filename) {
+        if (require_code_checks) {
+            return;
+        }
+
+        /** @var String filename */
+        if (filename.match(/\.php$/)) {
+            core.info('- Enabling code checks due to presence of PHP files in diff');
+            require_code_checks = true;
+        }
+
+        if (filename.match(/(phpunit|phpcs|psalm)\.xml(\.dist)?$/)) {
+            core.info('- Enabling code checks due to presence of check config files in diff');
+            require_code_checks = true;
+        }
+
+        if (filename.match(/composer\.(json|lock)$/)) {
+            core.info('- Enabling code checks due to presence of composer files in diff');
+            require_code_checks = true;
+        }
+
+        if (filename.match(/(^|[/\\])(\.github|src|lib|tests?|config|bin)[/\\]/)) {
+            core.info('- Enabling code checks due to file existing in source directory');
+            require_code_checks = true;
+        }
+    });
+}
+
 
 let composerJson = {};
 try {
@@ -57,7 +104,9 @@ if (fs.existsSync('composer.lock')) {
 core.info(`Dependency sets found: ${JSON.stringify(dependencies)}`);
 
 let phpunit = false;
-if (fs.existsSync('./phpunit.xml.dist') || fs.existsSync('./phpunit.xml')) {
+if (! require_code_checks) {
+    core.info('No code checks required; skipping PHPUnit checks');
+} else if (fs.existsSync('./phpunit.xml.dist') || fs.existsSync('./phpunit.xml')) {
     core.info('Found phpunit configuration');
     phpunit = true;
 } else {
@@ -74,6 +123,7 @@ if (config.checks !== undefined && Array.isArray(config.checks)) {
     [
         {
             command: "./vendor/bin/phpcs -q --report=checkstyle | cs2pr",
+            codeCheck: true,
             test: [
                 'phpcs.xml.dist',
                 'phpcs.xml',
@@ -81,6 +131,7 @@ if (config.checks !== undefined && Array.isArray(config.checks)) {
         },
         {
             command: "./vendor/bin/psalm --shepherd --stats --output-format=github",
+            codeCheck: true,
             test: [
                 'psalm.xml.dist',
                 'psalm.xml',
@@ -88,11 +139,17 @@ if (config.checks !== undefined && Array.isArray(config.checks)) {
         },
         {
             command: "./vendor/bin/phpbench run --revs=2 --iterations=2 --report=aggregate",
+            codeCheck: true,
             test: [
                 'phpbench.json',
             ]
         },
     ].forEach(function (check) {
+        // Skip code checks if they are not required
+        if (! require_code_checks && check.codeCheck) {
+            return;
+        }
+
         check.test.forEach(function (filename) {
             if (checks.indexOf(check.command) !== -1) {
                 return;
@@ -141,6 +198,23 @@ if (checks.length) {
             operatingSystem: 'ubuntu-latest',
             action: 'laminas/laminas-continuous-integration-action@v0',
         });
+    });
+}
+
+if (! jobs.length) {
+    let job = {
+        command: 'echo "No checks discovered!"',
+        php: stablePHP,
+        extensions: [],
+        ini: [],
+        dependencies: 'locked',
+    };
+
+    jobs.push({
+        name: 'No checks',
+        job: JSON.stringify(job),
+        operatingSystem: 'ubuntu-latest',
+        action: 'laminas/laminas-continuous-integration-action@v0',
     });
 }
 
