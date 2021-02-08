@@ -6,7 +6,7 @@ function checkout {
     local REF=
     case $GITHUB_EVENT_NAME in
         pull_request)
-            REF=refs/pull/$GITHUB_HEAD_REF
+            REF=$GITHUB_REF
             ;;
         push)
             REF=$GITHUB_REF
