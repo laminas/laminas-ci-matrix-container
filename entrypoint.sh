@@ -53,4 +53,4 @@ if [[ "$DIFF" != "" ]];then
     REQUIRE_CHECKS=false
 fi
 
-/action/index.js ${REQUIRE_CHECKS}
+node /action/index.js ${REQUIRE_CHECKS}
