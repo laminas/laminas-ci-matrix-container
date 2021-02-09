@@ -11,6 +11,9 @@ Currently, it identifies the following:
 - phpcs checks based on the presence of `phpcs.xml.dist` or `phpcs.xml` files.
 - Psalm checks based on the presence of `psalm.xml.dist` or `psalm.xml` files.
 - phpbench benchmarks based on the presence of a `phpbench.json`.
+- Markdown documentation based on the presence of a `mkdocs.yml` and/or markdown files in the `doc/book/` or `doc/books/` trees.
+
+Further, when triggered by a pull_request event, it determines what checks are necessary based on which files were affected.
 
 ## Usage
 
