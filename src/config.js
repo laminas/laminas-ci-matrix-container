@@ -18,12 +18,13 @@ const INSTALLABLE_VERSIONS = [
  * @return {Object}
  */
 function parseConfig (configFile) {
-    if (fs.existsSync(configFile)) {
-        try {
-            return JSON.parse(fs.readFileSync(configFile));
-        } catch (error) {
-            core.setFailed('Failed to parse ' + configFile + ': ' + error.message);
-        }
+    if (! fs.existsSync(configFile)) {
+        return {};
+    }
+    try {
+        return JSON.parse(fs.readFileSync(configFile));
+    } catch (error) {
+        core.setFailed('Failed to parse ' + configFile + ': ' + error.message);
     }
 }
 
@@ -109,7 +110,7 @@ class Config {
  * @param {String} composerLockFile
  * @return {Config}
  */
-const createConfig = function (requirements, configFile = '.laminas-ci.json', composerJsonFile = 'composer.json', composerLockFile = 'composer.lock') {
+const createConfig = function (requirements, configFile, composerJsonFile, composerLockFile) {
     return new Config(requirements, parseConfig(configFile), parseComposerJson(composerJsonFile), composerLockFile);
 }
 

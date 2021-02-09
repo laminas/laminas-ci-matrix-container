@@ -5,7 +5,12 @@ import configGatherer from './src/config.js';
 import createJobs from './src/create-jobs.js';
 
 const requirements = checkRequirements(process.argv.slice(2));
-const config       = configGatherer(requirements);
+const config       = configGatherer(
+    requirements,
+    '.laminas-ci.json',
+    'composer.json',
+    'composer.lock',
+);
 
 core.info(`Versions found: ${JSON.stringify(config.versions)}`);
 core.info(`Using stable PHP version: ${config.stable_version}`);
