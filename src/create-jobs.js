@@ -146,7 +146,7 @@ function checks (config) {
              * @return {Array}
              */
             function (config) {
-                return createQaJobs('yamllint mkdocs.yml', config);
+                return createQaJobs('yamllint -d relaxed --no-warnings mkdocs.yml', config);
             }
         ),
         new Check(
