@@ -13,23 +13,23 @@ Currently, it identifies the following:
 - phpbench benchmarks based on the presence of a `phpbench.json`.
 - Markdown documentation based on the presence of a `mkdocs.yml` and/or markdown files in the `doc/book/` or `doc/books/` trees.
 
-Further, when triggered by a pull_request event, it determines what checks are necessary based on which files were affected.
+Further, when triggered by a `pull_request` event, it determines what checks are necessary based on which files were affected.
 
-## Usage
+## Creating an action that uses the container
 
 Create a Dockerfile-based GitHub Action that uses this as the base image:
 
 ```Dockerfile
-FROM ghcr.io/laminas/laminas-ci-matrix-container:0
+FROM ghcr.io/laminas/laminas-ci-matrix-container:1
 
 LABEL "com.github.actions.icon"="share-2"
 LABEL "com.github.actions.color"="blue"
 ```
 
 The container emits one output, "matrix".
-Workflows using actions built with this container should expose the output, so that it can later be consumed as a matrix in another job:
+Workflows using actions built with this container should expose the output, so that it can later be consumed as a matrix in another job.
 
-## Usage
+## Standard usage via laminas/laminas-ci-matrix-action
 
 ```yaml
 jobs:
@@ -39,10 +39,9 @@ jobs:
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v2
-        name: Gather CI configuration
+      - name: Gather CI configuration
         id: matrix
-        uses: laminas/laminas-ci-matrix-action@v0
+        uses: laminas/laminas-ci-matrix-action@v1
 
   qa:
     name: QA Checks
@@ -53,7 +52,7 @@ jobs:
       matrix: ${{ fromJSON(needs.matrix.outputs.matrix) }}
     steps:
       - name: ${{ matrix.name }}
-        uses: laminas/laminas-continuous-integration-action@v0
+        uses: laminas/laminas-continuous-integration-action@v1
         with:
           job: ${{ matrix.job }}
 ```
@@ -82,7 +81,7 @@ It spits out a single output, "matrix", which is a JSON string in the following 
 ```
 
 The "exclude" element will only be present if the package using the action provides it via configuration.
-Each item in the "exclude" array will be an object, with one or more of the keys listed in the "include" objects; when a job matches all elements specified in the "exclude" array, it will be excluded from runs.
+Each item in the "exclude" array should be an object, with one or more of the keys listed in the "include" objects; when a job matches all elements specified in the "exclude" array, it will be excluded from runs.
 
 The "job" element is a string JSON object detailing the job to run.
 Note: it is **not** an object; it is a JSON string.
@@ -127,3 +126,15 @@ Packages consumed by this container can include a configuration file in its root
 
 The "checks" array should be in the same format as listed above for the outputs.
 Please remember that the **job** element **MUST** be a JSON **string**
+
+The easiest way to exclude a single job is via the `name` parameter:
+
+```json
+{
+  "exclude": [
+    {
+      "name": "PHPUnit on PHP 8.0 with latest dependencies"
+    }
+  ]
+}
+```
