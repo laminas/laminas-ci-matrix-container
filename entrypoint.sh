@@ -32,8 +32,8 @@ function checkout {
         echo "Checking out ref ${REF}"
         git checkout $REF
     else
-        echo "Fetching base branch ${BASE_BRANCH}"
-        git fetch origin ${BASE_BRANCH}:${BASE_BRANCH}
+        echo "Checking out branch ${BASE_BRANCH}"
+        git checkout ${BASE_BRANCH}
         echo "Fetching target ref ${REF}"
         git fetch origin ${REF}:${GITHUB_HEAD_REF}
         echo "Checking out target ref to ${GITHUB_HEAD_REF}"
