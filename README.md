@@ -73,15 +73,9 @@ It spits out a single output, "matrix", which is a JSON string in the following 
       "job": "(string) JSON object detailing the job (more on this later)",
     },
   ],
-  "exclude: [
-    {
-    }
-  ]
 }
 ```
 
-The "exclude" element will only be present if the package using the action provides it via configuration.
-Each item in the "exclude" array should be an object, with one or more of the keys listed in the "include" objects; when a job matches all elements specified in the "exclude" array, it will be excluded from runs.
 
 The "job" element is a string JSON object detailing the job to run.
 Note: it is **not** an object; it is a JSON string.
@@ -138,3 +132,5 @@ The easiest way to exclude a single job is via the `name` parameter:
   ]
 }
 ```
+
+Each item in the "exclude" array should be an object, with one or more of the keys listed in the "include" objects; when a job matches all elements specified in the "exclude" array, it will be excluded from runs.

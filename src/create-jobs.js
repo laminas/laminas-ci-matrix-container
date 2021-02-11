@@ -184,9 +184,41 @@ export default function (config) {
         return config.checks;
     }
 
+    /** @var {Array} jobs */
     let jobs = checks(config).reduce(function (jobs, check) {
         return jobs.concat(check.jobs(config));
     }, []);
+
+    const exclude = function (job, exclusion) {
+        let matches = 0;
+        Object.keys(job).forEach(function (jobKey) {
+            Object.keys(exclusion).forEach(function (excludeKey) {
+                if (excludeKey !== jobKey) {
+                    return;
+                }
+
+                if (job[jobKey] === exclusion[excludeKey]) {
+                    matches += 1;
+                }
+            });
+        });
+        return Object.keys(exclusion).length === matches;
+    };
+
+    jobs = jobs.filter(
+        function (job) {
+            let keep = true;
+            config.exclude.forEach(function (exclusion) {
+                keep = keep && ! exclude(job, exclusion);
+            });
+
+            if (! keep) {
+                console.log('Excluding job', job.toJSON());
+            }
+
+            return keep;
+        }
+    );
 
     return jobs.length ? jobs : createNoOpJob(config);
 };

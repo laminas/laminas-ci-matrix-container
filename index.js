@@ -22,9 +22,5 @@ core.info(`Dependency sets found: ${JSON.stringify(config.dependencies)}`);
 
 let matrix = {include: createJobs(config)};
 
-if (config.exclude.length) {
-    matrix.exclude = config.exclude;
-}
-
 core.info(`Matrix: ${JSON.stringify(matrix)}`);
 core.setOutput('matrix', JSON.stringify(matrix));
