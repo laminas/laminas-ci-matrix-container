@@ -12,6 +12,8 @@ const config       = configGatherer(
     'composer.lock',
 );
 
+core.info(`Running code checks: ${config.code_checks ? "Yes" : "No"}`);
+core.info(`Running doc linting: ${config.doc_linting ? "Yes" : "No"}`);
 core.info(`Versions found: ${JSON.stringify(config.versions)}`);
 core.info(`Using stable PHP version: ${config.stable_version}`);
 core.info(`Using php extensions: ${JSON.stringify(config.extensions)}`);

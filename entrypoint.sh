@@ -48,14 +48,12 @@ DIFF=
 if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]];then
     echo "Preparing file diff"
     DIFF=$(git diff --name-only $GITHUB_BASE_REF...HEAD)
-    echo ${DIFF} > .laminas-ci-diff
 fi
 
 REQUIRE_CHECKS=true
 if [[ "$DIFF" != "" ]];then
     echo "Found changes in the following files:"
-    cat .laminas-ci-diff
-    REQUIRE_CHECKS=false
+    echo ${DIFF}
 fi
 
-node /action/index.js ${REQUIRE_CHECKS}
+node /action/index.js ${DIFF}
