@@ -13,12 +13,12 @@ function checkout {
             BASE_BRANCH=$GITHUB_BASE_REF
             ;;
         push)
-            REF=$GITHUB_REF
-            LOCAL_BRANCH=$GITHUB_REF
+            REF=${GITHUB_REF/refs\/heads\//}
+            LOCAL_BRANCH=${REF}
             ;;
         tag)
-            REF=$GITHUB_REF
-            LOCAL_BRANCH=$GITHUB_REF
+            REF=${GITHUB_REF/refs\/tags\//}
+            LOCAL_BRANCH=${REF}
             ;;
         *)
             echo "Unable to handle events of type $GITHUB_EVENT_NAME; aborting"
