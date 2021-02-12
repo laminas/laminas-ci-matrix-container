@@ -1,4 +1,4 @@
-FROM node:buster
+FROM node:buster-slim
 
 LABEL "repository"="http://github.com/laminas/laminas-ci-matrix-container"
 LABEL "homepage"="http://github.com/laminas/laminas-ci-matrix-container"
