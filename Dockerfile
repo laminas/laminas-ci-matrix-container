@@ -1,13 +1,11 @@
-FROM node:buster
+FROM node:current-alpine
 
 LABEL "repository"="http://github.com/laminas/laminas-ci-matrix-container"
 LABEL "homepage"="http://github.com/laminas/laminas-ci-matrix-container"
 LABEL "maintainer"="https://github.com/laminas/technical-steering-committee/"
 
-RUN apt-get update \
-    && apt-get full-upgrade -y \
-    && apt-get install -y git \
-    && apt-get clean
+RUN apk update \
+    && apk add --no-cache bash git
 
 RUN mkdir /action
 ADD index.js /action/index.js
