@@ -1,11 +1,8 @@
 name: Release container
 
 on:
-  push:
-    branches-ignore:
-      - '**'
-    tags:
-      - '*'
+  release:
+    types: [published]
 
 jobs:
   tags:
